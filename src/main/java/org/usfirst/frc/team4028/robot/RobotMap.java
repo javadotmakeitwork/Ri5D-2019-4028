@@ -28,18 +28,9 @@ public class RobotMap
 	public static final int PCM_CAN_ADDR = 0;	
 	
 	// Talons Can Bus Address
-	public static final int LEFT_DRIVE_MASTER_CAN_ADDR = 1;
-	public static final int LEFT_DRIVE_SLAVE_CAN_ADDR = 2;
-	public static final int RIGHT_DRIVE_MASTER_CAN_ADDR = 3;
-	public static final int RIGHT_DRIVE_SLAVE_CAN_ADDR = 4;
-	public static final int LEFT_SWITCHBLADE_MOTOR_CAN_ADDRESS = 5;
-	public static final int RIGHT_SWITCHBLADE_MOTOR_CAN_ADDRESS = 6;
-	public static final int ELEVATOR_LIFT_MASTER_CAN_ADDRESS = 7;
-	public static final int CARRIAGE_LEFT_CAN_ADDRESS = 8;
-	public static final int CARRIAGE_RIGHT_CAN_ADDRESS = 9;
-	public static final int RIGHT_INFEED_DRIVE_CAN_ADDRESS = 10;
-	public static final int LEFT_INFEED_DRIVE_CAN_ADDRESS = 11;
-	public static final int CLIMBER_CAN_ADDRESS = 12;
+	public static final int ELEVATOR_MOTOR_CAN_ADDR = 1;
+	public static final int CLIMB_DRIVE_MOTOR_CAN_ADDR = 2;
+
 	
 	// DIO Ports
 	public static final int CARRIAGE_LIMIT_SWITCH_DIO_PORT = 0;

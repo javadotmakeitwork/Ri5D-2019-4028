@@ -35,7 +35,7 @@ public class Robot extends TimedRobot
 	private static final String ROBOT_NAME = "2018 PowerUp (ECLIPSE)-CMD BASED";
 	
 	// create instance of singelton Subsystems
-	private Dashboard _dashboard = Dashboard.getInstance();
+	private Dashboard _dashboard = Dashboard.getInstance();	private Spark _spark;
 	
 	private Chassis _chassis = Chassis.getInstance();
 	private OI _oi = OI.getInstance();
@@ -58,7 +58,8 @@ public class Robot extends TimedRobot
 		_chassis.stop();
 		Paths.buildPaths();
 		_buildMsg = GeneralUtilities.WriteBuildInfoToDashboard(ROBOT_NAME);
-
+		_spark = new Spark(0);
+		
 		outputAllToDashboard();
 	}
 
@@ -91,19 +92,6 @@ public class Robot extends TimedRobot
 		_chassis.zeroSensors();
 		_chassis.setHighGear(true);
 
-		int retries = 100;
-		
-		while(!_dashboard.isGameDataReceived() && retries > 0) {
-			retries--;
-			try { 
-				Thread.sleep(5);
-			} catch (InterruptedException ie) {}
-		}
-		
-		if (retries == 0) {
-			DriverStation.reportError("Failed To Receive Game Data", false);
-		}
-
 		_lastDashboardWriteTimeMSec = new Date().getTime(); // snapshot time to control spamming
 		_dataLogger = GeneralUtilities.setupLogging("Auton"); // init data logging	
 		_dashboard.outputToDashboard();
@@ -115,6 +103,7 @@ public class Robot extends TimedRobot
 	@Override
 	public void autonomousPeriodic() 
 	{
+
 		Scheduler.getInstance().run();
 		_chassis.updateChassis(Timer.getFPGATimestamp());
 		// System.out.println(_chassis.isDoneWithPath());
