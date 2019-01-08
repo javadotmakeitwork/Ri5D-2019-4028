@@ -47,6 +47,7 @@ public class Chassis extends Subsystem
 
 	public double _leftMtrDriveSetDistanceCmd;
 	public double _rightMtrDriveSetDistanceCmd;
+	//public double _throttle;
 	private double _targetAngle, _angleError;
 	private boolean _isTurnRight;
 	private static final double ENCODER_ROTATIONS_PER_DEGREE = 46.15/3600;
@@ -113,7 +114,7 @@ public class Chassis extends Subsystem
         configDriveMotors(_rightSlave);
 
 		_shifter = new DoubleSolenoid(RobotMap.PCM_CAN_ADDR, RobotMap.SHIFTER_EXTEND_PCM_PORT, RobotMap.SHIFTER_RETRACT_PCM_PORT);
-	
+		
 	}
 
 
@@ -124,11 +125,6 @@ public class Chassis extends Subsystem
 			case PERCENT_VBUS:
 				return;
 				
-			case AUTO_TURN:
-				//GeneralUtilities.setPIDFGains(_leftMaster, MOTION_MAGIC_TURN_PIDF_GAINS);
-				//GeneralUtilities.setPIDFGains(_rightMaster, MOTION_MAGIC_TURN_PIDF_GAINS);
-				moveToTargetAngle();
-				return;
 				
 			case DRIVE_SET_DISTANCE:
 				//GeneralUtilities.setPIDFGains(_leftMaster, MOTION_MAGIC_STRAIGHT_PIDF_GAINS);
@@ -145,9 +141,7 @@ public class Chassis extends Subsystem
 				//	GeneralUtilities.setPIDFGains(_rightMaster, LOW_GEAR_VELOCITY_PIDF_GAINS);
 				}
 				
-				if (_pathFollower != null) 
-					updatePathFollower(timestamp);
-				return;
+	
 		}
 	}
 
@@ -156,21 +150,13 @@ public class Chassis extends Subsystem
 	
 	/* ===== Chassis State: PERCENT VBUS ===== */
 	/** Arcade drive with throttle and turn inputs. Includes anti-tipping. */
-	public synchronized void arcadeDrive(double throttle, double turn) {
-		//_chassisState = ChassisState.PERCENT_VBUS;
 		
-		if(_navX.isPitchPastThreshhold()) 
-		{
-			setLeftRightCommand(ControlMode.PercentOutput, 0.0, 0.0);
-			DriverStation.reportError("Tipping Threshold", false);
-		} 
-		else if ((Math.abs(get_leftVelocityInchesPerSec() - get_rightVelocityInchesPerSec())) < 5.0) {
-			setLeftRightCommand(ControlMode.PercentOutput, throttle + 0.7 * turn, throttle - 0.7 * turn);
-		} 
-		else {
-			setLeftRightCommand(ControlMode.PercentOutput, throttle + 0.5 * turn, throttle - 0.5 * turn);
-		} 
-	}
+		public void arcadeDrive(double throttleCmdRaw, double turnCmdRaw)
+  		{
+    		_leftMaster.set(ControlMode.PercentOutput, throttleCmdRaw + (0.7 * turnCmdRaw));
+    		_rightMaster.set(ControlMode.PercentOutput, throttleCmdRaw + (0.7 * -1.0 * turnCmdRaw));
+  		}
+	
 	
 	/* ===== SHIFTER ===== */
     public synchronized void toggleShifter() {
@@ -186,43 +172,18 @@ public class Chassis extends Subsystem
 	
 	private void configMasterMotors(TalonSRX talon) {
 		talon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
-		talon.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5, 0);
-	
-        talon.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_10Ms, 0);
-        talon.configVelocityMeasurementWindow(32, 0);
-        
-        talon.configOpenloopRamp(0.4, 10);
-		talon.configClosedloopRamp(0.0, 0);
 	}
 	
 	private void configDriveMotors(TalonSRX talon) {
 		talon.configForwardLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.Disabled, 0);
 		talon.configReverseLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.Disabled, 0);
         
-        talon.enableCurrentLimit(false);
-        
-        talon.configPeakOutputForward(1.0, 10);
-        talon.configPeakOutputReverse(-1.0, 10);
-        talon.configNominalOutputForward(0, 10);
-        talon.configNominalOutputReverse(0, 10);
-        talon.configContinuousCurrentLimit(Constants.BIG_NUMBER, 10);
 	}
 	
     // Put methods for controlling this subsystem
     // here. Call these from Commands.
 
-	public void initDefaultCommand() {}
-	
-	public void setMotionMagicCmdInches(double Distance)
-	{
-		_chassisState=ChassisState.DRIVE_SET_DISTANCE;
-		_leftMtrDriveSetDistanceCmd = _leftMaster.getSelectedSensorPosition(0)+ InchestoNU(Distance);
-		_rightMtrDriveSetDistanceCmd = _rightMaster.getSelectedSensorPosition(0)+InchestoNU(Distance);
 
-		System.out.println("Target Position: " + _leftMtrDriveSetDistanceCmd);
-		System.out.println("Current Position: " + _leftMaster.getSelectedSensorPosition(0));
-		setHighGear(false);
-	}
 
 	public void moveToTargetPosDriveSetDistance ()
 	{
@@ -235,127 +196,6 @@ public class Chassis extends Subsystem
 		setHighGear(false);
 
 	}
-
-	//==================================================================================
-	//AUTOTURN
-	//==================================================================================
-
-	public synchronized void setTargetAngleAndTurnDirection(double targetAngle, boolean isTurnRight) {
-		_targetAngle = targetAngle;
-		_isTurnRight = isTurnRight;
-		setHighGear(false);
-		_chassisState = ChassisState.AUTO_TURN;
-	}
-
-	private void moveToTargetAngle() {
-		// TODO: This code needs to be simplified. Should convert angles to vectors and use dot product to get angle difference.
-		if((_navX.getYaw() >= 0 && _targetAngle >= 0 && _isTurnRight && _navX.getYaw() > _targetAngle) ||
-			(_navX.getYaw() >= 0 && _targetAngle < 0 && _isTurnRight) ||
-			(_navX.getYaw() < 0 && _targetAngle < 0 && _isTurnRight && Math.abs(_navX.getYaw()) < Math.abs(_targetAngle))) {
-			_angleError = 360 - _navX.getYaw() + _targetAngle;
-		}
-		else if((_navX.getYaw() >= 0 && _targetAngle >= 0 && _isTurnRight && _navX.getYaw() < _targetAngle)||
-				(_navX.getYaw() >= 0 && _targetAngle >= 0 && !_isTurnRight && _navX.getYaw() > _targetAngle)||
-				(_navX.getYaw() >= 0 && _targetAngle < 0 && !_isTurnRight) ||
-				(_navX.getYaw() < 0 && _targetAngle >= 0 && _isTurnRight) ||
-				(_navX.getYaw() < 0 && _targetAngle < 0 && _isTurnRight && Math.abs(_navX.getYaw()) > Math.abs(_targetAngle)) ||
-				(_navX.getYaw() < 0 && _targetAngle < 0 && !_isTurnRight && Math.abs(_navX.getYaw()) < Math.abs(_targetAngle))) {
-			_angleError = _targetAngle - _navX.getYaw();
-		}		
-		else if((_navX.getYaw() >= 0 && _targetAngle >= 0 && !_isTurnRight && _navX.getYaw() < _targetAngle)||
-				(_navX.getYaw() < 0 && _targetAngle < 0 && !_isTurnRight && Math.abs(_navX.getYaw()) > Math.abs(_targetAngle))||
-				(_navX.getYaw() < 0 && _targetAngle >= 0 && !_isTurnRight)) {
-			_angleError = _targetAngle - _navX.getYaw() - 360;
-		}			
-		
-		double encoderError = ENCODER_ROTATIONS_PER_DEGREE * _angleError *ENCODER_COUNTS_PER_WHEEL_REV;		
-		double leftDriveTargetPos = get_leftPos() + encoderError;
-		double rightDriveTargetPos = get_rightPos() - encoderError;
-		
-		setLeftRightCommand(ControlMode.MotionMagic, leftDriveTargetPos, rightDriveTargetPos);
-	}
-	//====================================================================================
-	// PATH FOLLOWING
-	//===================================================================================
-
-	public void zeroEncoders(){
-		_leftMaster.getSensorCollection().setQuadraturePosition(0, 10);
-		_rightMaster.getSensorCollection().setQuadraturePosition(0, 10);
-	}
-
-	public void zeroGyro(){
-		_navX.zeroYaw();
-	}
-
-	public void zeroSensors(){
-		zeroEncoders();
-		zeroGyro();
-	}
-
-
-
-	public synchronized void setWantDrivePath(Path path, boolean reversed) {
-        if (_currentPath != path || _chassisState != ChassisState.FOLLOW_PATH) {
-			_leftEncoderPrevDistance = get_leftPos()/ENCODER_COUNTS_PER_WHEEL_REV * Constants.DRIVE_WHEEL_DIAMETER_IN * Math.PI;
-	        _rightEncoderPrevDistance = get_leftPos()/ENCODER_COUNTS_PER_WHEEL_REV * Constants.DRIVE_WHEEL_DIAMETER_IN * Math.PI;
-            RobotState.getInstance().resetDistanceDriven();
-            _pathFollower = new PathFollower(path, reversed, path.maxAccel, path.maxDecel, path.inertiaSteeringGain);
-            _chassisState = ChassisState.FOLLOW_PATH;
-            _currentPath = path;
-        } else {
-        	setLeftRightCommand(ControlMode.Velocity, 0.0, 0.0);
-        }
-    }
-
-	public void updatePathFollower(double timestamp) {
-		estimateRobotState(timestamp);
-		RigidTransform _robotPose = RobotState.getInstance().getLatestFieldToVehicle().getValue();
-		Twist command = _pathFollower.update(timestamp, _robotPose, RobotState.getInstance().getDistanceDriven(), RobotState.getInstance().getPredictedVelocity().dx);
-		if (!_pathFollower.isFinished()) {
-			Kinematics.DriveVelocity setpoint = Kinematics.inverseKinematics(command);
-			final double maxDesired = Math.max(Math.abs(setpoint.left), Math.abs(setpoint.right));
-            final double scale = maxDesired > Constants.DRIVE_VELOCITY_MAX_SETPOINT ? Constants.DRIVE_VELOCITY_MAX_SETPOINT / maxDesired : 1.0;
-            setLeftRightCommand(ControlMode.Velocity, inchesPerSecToNU(setpoint.left * scale), inchesPerSecToNU(setpoint.right * scale));
-            _centerTargetVelocity = command.dx;
-			_leftTargetVelocity = setpoint.left;
-			_rightTargetVelocity = setpoint.right;
-		} else {
-			setLeftRightCommand(ControlMode.Velocity, 0.0, 0.0);
-		}
-	}
-	public synchronized boolean isDoneWithPath() {
-		if (_chassisState == ChassisState.FOLLOW_PATH && _pathFollower != null){
-			if (_pathFollower.isFinished()){
-				System.out.println("Chassis Done With Path");
-				return true;
-			}
-			else{
-				return false;
-			}
-		} else {
-           // System.out.println("Robot is not in path following mode");
-			return true;
-		}
-    }
-
-    /** Path following e-stop */
-    public synchronized void forceDoneWithPath() {
-        if (_chassisState == ChassisState.FOLLOW_PATH && _pathFollower != null)
-            _pathFollower.forceFinish();
-		else{}
-		
-           // System.out.println("Robot is not in path following mode");
-	}
-	public synchronized double getRemainingPathDistance() {
-		if (_pathFollower != null) {
-			return _pathFollower.remainingPathLength();
-		} 
-		return 0;
-	}
-
-
-
-
 
 
 
@@ -442,38 +282,12 @@ public class Chassis extends Subsystem
 
     public double getRightVelocityInchesPerSec() {
         return rpmToInchesPerSecond(getRightSpeedRPM());
-	}
-	
-	private double getAcceleration(){
-		this._leftMasterVelocityLoggingLastLogTime = this._leftMasterVelocityLoggingThisTime;
-		this._leftMasterVelocityLoggingThisTime = Timer.getFPGATimestamp();
-		this._leftMasterPreviousVelocity = this._leftMasterCurrentVelocity;
-		this._leftMasterCurrentVelocity = NUper100msToInchesPerSec(_leftMaster.getSelectedSensorVelocity(0));
-		if (! this._isFirstTimeLoggingAccel){
-			double dt = this._leftMasterVelocityLoggingThisTime - this._leftMasterVelocityLoggingLastLogTime;
-			double dv = this._leftMasterCurrentVelocity - this._leftMasterPreviousVelocity;
-			double accel = dv/dt;
-			return accel;
-		} else {
-			this._isFirstTimeLoggingAccel = false;
-			return 0;
-		}
+
 
 	}
 	
-	private void estimateRobotState( double timestamp)
-	{
-		final double left_distance = NUtoInches(get_leftPos());
-		final double right_distance = NUtoInches(get_rightPos());
-		final Rotation gyro_angle = Rotation.fromDegrees(get_Heading());
-		final Twist odometry_velocity = _robotState.generateOdometryFromSensors(
-				left_distance - _leftEncoderPrevDistance, right_distance - _rightEncoderPrevDistance, gyro_angle);
-		final Twist predicted_velocity = Kinematics.forwardKinematics(getLeftVelocityInchesPerSec(),
-				getRightVelocityInchesPerSec());
-		_robotState.addObservations(timestamp, odometry_velocity, predicted_velocity);
-		_leftEncoderPrevDistance = left_distance;
-		_rightEncoderPrevDistance = right_distance;
-	}
+	
+
 	//=====================================================================================
 	// Support Methods
 	//=====================================================================================
@@ -486,7 +300,7 @@ public class Chassis extends Subsystem
 		logData.AddData("Right Actual Velocity [in/s]", String.valueOf(GeneralUtilities.roundDouble(-get_rightVelocityInchesPerSec(), 2)));
 		//logData.AddData("Right Target Velocity [in/s]", String.valueOf(GeneralUtilities.roundDouble(_rightTargetVelocity, 2)));
 		logData.AddData("Right Output Current", String.valueOf(GeneralUtilities.roundDouble(_rightMaster.getOutputCurrent(), 2)));
-		logData.AddData("Chassis Acceleration [in/s/s]", String.valueOf(GeneralUtilities.roundDouble(getAcceleration(), 2)));
+
 		//logData.AddData("Pose X", String.valueOf(RobotState.getInstance().getLatestFieldToVehicle().getValue().getTranslation().x()));
 		//logData.AddData("Pose Y", String.valueOf(RobotState.getInstance().getLatestFieldToVehicle().getValue().getTranslation().y()));
 		//logData.AddData("Pose Angle", String.valueOf(RobotState.getInstance().getLatestFieldToVehicle().getValue().getRotation().getDegrees()));
@@ -509,6 +323,11 @@ public class Chassis extends Subsystem
 		
 		SmartDashboard.putNumber("Chassis: Angle", GeneralUtilities.roundDouble(get_Heading(), 2));
 		SmartDashboard.putString("Chassis: Robot Pose", "N/A"); //RobotState.getInstance().getLatestFieldToVehicle().getValue().toString());
+	}
+
+	@Override
+	protected void initDefaultCommand() {
+
 	}
 
 }

@@ -89,7 +89,6 @@ public class Robot extends TimedRobot
 		Scheduler.getInstance().run();
 
 
-		_chassis.zeroSensors();
 		_chassis.setHighGear(true);
 
 		_lastDashboardWriteTimeMSec = new Date().getTime(); // snapshot time to control spamming
