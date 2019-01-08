@@ -1,16 +1,20 @@
 package org.usfirst.frc.team4028.robot.subsystems;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import org.usfirst.frc.team4028.robot.RobotMap;
+import java.awt.datatransfer.FlavorMap;
+
+import edu.wpi.first.wpilibj.DigitalInput;
 public class ElevatorClimber
 {
-    private TalonSRX _elevatorMtr,_climbDriveMtr;
-    private boolean _hasElevatorBeenZeroed, _isRobotElevated;
+    private TalonSRX _elevatorMtr,_climbDriveMtr, _armMtr;
+    private boolean _hasElevatorBeenZeroed, _isRobotElevated,_readyToElevate =false;
+    private DigitalInput _isElevatorOnGround;
     
     
     private static ElevatorClimber _instance = new ElevatorClimber();
@@ -22,24 +26,28 @@ public class ElevatorClimber
     {
         _elevatorMtr=new TalonSRX(RobotMap.ELEVATOR_MOTOR_CAN_ADDR);
         _climbDriveMtr=new TalonSRX(RobotMap.CLIMB_DRIVE_MOTOR_CAN_ADDR);
-        configElevatorMotor();
+        _armMtr = new TalonSRX(RobotMap.RANDOM_ARM_THINGY_CAN_ADDR);
+        _isElevatorOnGround = new DigitalInput(RobotMap.ELEVATOR_ON_GROUND_LIMIT_SWITCH_DIO_PORT);
+        configMtrs();
 
     }
 
-    public void configElevatorMotor()
+    public void configMtrs()
     {
         _elevatorMtr.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyClosed, 10);
         _elevatorMtr.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyClosed, 10);
+        _elevatorMtr.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
         _elevatorMtr.setNeutralMode(NeutralMode.Brake);
-
-        /*
-        LIMIT SWITCH or PID Configuration Here
-        */
+        _armMtr.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyClosed, 10);
+        _elevatorMtr.config_kP(0, 0, 10);
+        _elevatorMtr.config_kI(0, 0, 10);
+        _elevatorMtr.config_kD(0, 0, 10);
+        _elevatorMtr.config_kF(0, 0, 10);
     }
 
     public void zeroElevator()
     {
-        if(!_elevatorMtr.getSensorCollection().isRevLimitSwitchClosed())
+        if(_elevatorMtr.getSensorCollection().isRevLimitSwitchClosed())
         {
             _elevatorMtr.set(ControlMode.PercentOutput, -0.1);
             _hasElevatorBeenZeroed=false;
@@ -47,23 +55,49 @@ public class ElevatorClimber
         else
         {
             _elevatorMtr.set(ControlMode.PercentOutput, 0);
+            _elevatorMtr.setSelectedSensorPosition(0, 0, 10);
             _hasElevatorBeenZeroed=true;
         }
     }
 
     public void elevate()
     {
-        if(!_elevatorMtr.getSensorCollection().isFwdLimitSwitchClosed())
+        if(_readyToElevate)
         {
-            _elevatorMtr.set(ControlMode.PercentOutput, 0.1);
-            _isRobotElevated = false;
+            if(_elevatorMtr.getSensorCollection().isFwdLimitSwitchClosed())
+            {
+                _elevatorMtr.set(ControlMode.PercentOutput, 0.1);
+                _isRobotElevated = false;
+            }
+            else
+            {
+                _elevatorMtr.set(ControlMode.PercentOutput, 0);
+                _isRobotElevated=true;    
+            } 
         }
         else
         {
-            _elevatorMtr.set(ControlMode.PercentOutput, 0);
-            _isRobotElevated=true;
+            yeetTheArm();
+        }
+    }
 
+    public void yeetTheArm()
+    {
+        if(_armMtr.getSensorCollection().isFwdLimitSwitchClosed())
+        {
+            _armMtr.set(ControlMode.PercentOutput, 0.3);
+            _readyToElevate=false;
+        }
+        else
+        {
+            _armMtr.set(ControlMode.PercentOutput, 0);
+            _readyToElevate=true;
         } 
+    }
+
+    public void keepElevatorAtMaxHeight()
+    {
+        _elevatorMtr.set(ControlMode.MotionMagic, _elevatorMtr.getSelectedSensorPosition(0));
     }
 
     public boolean hasElevatorBeenZeroed()
@@ -96,7 +130,15 @@ public class ElevatorClimber
 
     public void driveDown()
     {
-      //#TODO  
+        if(_isElevatorOnGround.get())
+        {
+            _climbDriveMtr.set(ControlMode.PercentOutput, 0.1);
+            _elevatorMtr.set(ControlMode.PercentOutput, -0.1);
+        }
+        else
+        {
+            _elevatorMtr.set(ControlMode.PercentOutput, 0.1);
+        }
     }
 
 }

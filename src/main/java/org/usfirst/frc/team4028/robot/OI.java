@@ -1,6 +1,6 @@
 package org.usfirst.frc.team4028.robot;
 
-import org.usfirst.frc.team4028.robot.commands.Chassis_ArcadeDriveAction;
+import org.usfirst.frc.team4028.robot.commands.*;
 
 //#region Define Imports
 
@@ -8,6 +8,7 @@ import org.usfirst.frc.team4028.robot.util.BeakXboxController;
 
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 //#endregion
+import edu.wpi.first.wpilibj.command.Command;
 
 /**
  * This class is the glue that binds the controls on the physical operator
@@ -65,10 +66,10 @@ public class OI {
 		// Driver Controller -> Command Mapping
 			DriverController.leftStick.whileActive(new Chassis_ArcadeDriveAction(DriverController.leftStick, DriverController.rightStick));
 			DriverController.rightStick.whileActive(new Chassis_ArcadeDriveAction(DriverController.leftStick, DriverController.rightStick));
-
- 
-			DriverController.leftStick.whenReleased(new Chassis_ArcadeDriveAction(DriverController.leftStick, DriverController.rightStick));
-			DriverController.rightStick.whenReleased(new Chassis_ArcadeDriveAction(DriverController.leftStick, DriverController.rightStick));
+			DriverController.a.whenPressed(new Climber_RaiseChassis());
+			DriverController.b.whenPressed(new Climber_MoveForward(DriverController.b));
+			DriverController.x.whenPressed(new Climber_RestoreElevator());
+			DriverController.y.whenPressed(new Climber_GetDownFromLvl2());
 
 		// =========== Operator ======================================
 		OperatorController = new BeakXboxController(RobotMap.OPERATOR_GAMEPAD_USB_PORT);

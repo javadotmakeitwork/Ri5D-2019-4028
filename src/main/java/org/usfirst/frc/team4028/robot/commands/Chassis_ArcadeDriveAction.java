@@ -16,43 +16,68 @@ public class Chassis_ArcadeDriveAction extends Command
     double _startTime; 
     private Thumbstick _leftThumbstick;
     private Thumbstick _rightThumbstick;
+    boolean _isDriverControlled;
 
 
-
-    public Chassis_ArcadeDriveAction(double throttle, double waitTime){
-    _throttle = throttle;
-    _waitTime = waitTime;
+    public Chassis_ArcadeDriveAction(double throttle, double waitTime)
+    {
+        _throttle = throttle;
+        _waitTime = waitTime;
+        _isDriverControlled=false;
     }
 
-    public Chassis_ArcadeDriveAction(double throttle, double waitTime, double turn){
+    public Chassis_ArcadeDriveAction(double throttle, double waitTime, double turn)
+    {
         _throttle = throttle;
         _waitTime = waitTime;
         _turn = turn;
+        _isDriverControlled=false;
     }
 
 
     public Chassis_ArcadeDriveAction(Thumbstick leftStick, Thumbstick rightStick) 
     {
+        setInterruptible(true);
         _leftThumbstick = leftStick;
         _rightThumbstick = rightStick;
+        _isDriverControlled=true;
 	}
 
-	protected void initialize() {    	
+    protected void initialize() 
+    {    	
         _startTime = Timer.getFPGATimestamp();
 		_chassis.setHighGear(false);
     }
 
     
-    protected void execute() {
-        if ((Timer.getFPGATimestamp() - _startTime) > _waitTime) {
-			_chassis.stop();
-		} else {
-			_chassis.arcadeDrive(-_throttle, _turn);
-		}
+    protected void execute() 
+    {
+        if(!_isDriverControlled)
+        {
+            if ((Timer.getFPGATimestamp() - _startTime) > _waitTime) 
+            {
+                _chassis.stop();
+            } 
+            else 
+            {
+                _chassis.arcadeDrive(-_throttle, _turn);
+            }
+        }
+        else
+        {
+            _chassis.arcadeDrive(-_throttle, _turn);
+        }
     }
 
     protected boolean isFinished() {
-        return (Timer.getFPGATimestamp() - _startTime) > _waitTime;
+        if(_isDriverControlled)
+        {
+            return false;
+        }
+        else
+        {
+            return (Timer.getFPGATimestamp() - _startTime) > _waitTime;
+        }
     }
 
     protected void end() {

@@ -7,47 +7,34 @@
 
 package org.usfirst.frc.team4028.robot;
 
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Spark;
 // #region Import Statements
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import java.util.Date;
 
 import org.usfirst.frc.team4028.robot.auton.Paths;
-import org.usfirst.frc.team4028.robot.sensors.SwitchableCameraServer;
 import org.usfirst.frc.team4028.robot.subsystems.Chassis;
-import org.usfirst.frc.team4028.robot.util.GeneralUtilities;
-import org.usfirst.frc.team4028.robot.util.LogDataBE;
-import org.usfirst.frc.team4028.robot.util.MovingAverage;
-import org.usfirst.frc.team4028.robot.util.DataLogger;
-// #endregion
+
 
 /**
  * The VM is configured to automatically run this class
  */
 public class Robot extends TimedRobot 
 {
-	private static final String ROBOT_NAME = "2018 PowerUp (ECLIPSE)-CMD BASED";
 	
 	// create instance of singelton Subsystems
-	private Dashboard _dashboard = Dashboard.getInstance();	private Spark _spark;
+	private Dashboard _dashboard = Dashboard.getInstance();
 	
 	private Chassis _chassis = Chassis.getInstance();
 	private OI _oi = OI.getInstance();
-	private SwitchableCameraServer _camera = SwitchableCameraServer.getInstance();
+
 
 
 	// class level working variables
-	private DataLogger _dataLogger = null;
-	private String _buildMsg = "?";
- 	long _lastScanEndTimeInMSec = 0;
  	long _lastDashboardWriteTimeMSec;
- 	MovingAverage _scanTimeSamples;
+
  	
 	/**
 	 * This function is run when the robot is first started up and should be used for any initialization code.
@@ -57,8 +44,7 @@ public class Robot extends TimedRobot
 	{
 		_chassis.stop();
 		Paths.buildPaths();
-		_buildMsg = GeneralUtilities.WriteBuildInfoToDashboard(ROBOT_NAME);
-		_spark = new Spark(0);
+
 		
 		outputAllToDashboard();
 	}
@@ -92,7 +78,6 @@ public class Robot extends TimedRobot
 		_chassis.setHighGear(true);
 
 		_lastDashboardWriteTimeMSec = new Date().getTime(); // snapshot time to control spamming
-		_dataLogger = GeneralUtilities.setupLogging("Auton"); // init data logging	
 		_dashboard.outputToDashboard();
 	}
 
@@ -112,7 +97,7 @@ public class Robot extends TimedRobot
 		outputAllToDashboard();
 		
 		// ============= Optionally Log Data =============
-		logAllData();
+		
 	}
 
 	/**
@@ -126,7 +111,6 @@ public class Robot extends TimedRobot
 		// this line or comment it out.
 		_chassis.stop();
 		_lastDashboardWriteTimeMSec = new Date().getTime(); // snapshot time to control spamming
-		_dataLogger = GeneralUtilities.setupLogging("Teleop"); // init data logging
 		_lastDashboardWriteTimeMSec = new Date().getTime(); // snapshot time to control spamming
 	}
 
@@ -141,7 +125,7 @@ public class Robot extends TimedRobot
 		_dashboard.outputToDashboard();
 		
 		// ============= Optionally Log Data =============
-		logAllData();
+
 	}
 
 	/**
@@ -153,7 +137,6 @@ public class Robot extends TimedRobot
 	/** Method to Push Data to ShuffleBoard */
 	private void outputAllToDashboard() {
 		// limit spamming
-    	long scanCycleDeltaInMSecs = new Date().getTime() - _lastScanEndTimeInMSec;
     	// add scan time sample to calc scan time rolling average
     	//_scanTimeSamples.add(new BigDecimal(scanCycleDeltaInMSecs));
     	
@@ -165,7 +148,6 @@ public class Robot extends TimedRobot
 
 	    	
     		// write the overall robot dashboard info
-	    	SmartDashboard.putString("Robot Build", _buildMsg);
 	    	
 	    	//BigDecimal movingAvg = _scanTimeSamples.getAverage();
 	    	//DecimalFormat df = new DecimalFormat("####");
@@ -175,21 +157,7 @@ public class Robot extends TimedRobot
     	}
     	
     	// snapshot when this scan ended
-    	_lastScanEndTimeInMSec = new Date().getTime();
 	}
 	
-	/** Method for Logging Data to the USB Stick plugged into the RoboRio */
-	private void logAllData() { 
-		// always call this 1st to calc drive metrics
-    	if(_dataLogger != null) {    	
-	    	// create a new, empty logging class
-        	LogDataBE logData = new LogDataBE();
-	    	
-	    	// ask each subsystem that exists to add its data
-	    	_chassis.updateLogData(logData);
 
-			
-	    	_dataLogger.WriteDataLine(logData);
-    	}
-	}
 }

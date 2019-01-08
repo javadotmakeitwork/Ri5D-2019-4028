@@ -34,10 +34,11 @@ public class RobotMap
 	public static final int RIGHT_DRIVE_SLAVE_CAN_ADDR = 4;
 	public static final int ELEVATOR_MOTOR_CAN_ADDR = 5;
 	public static final int CLIMB_DRIVE_MOTOR_CAN_ADDR = 6;
+	public static final int RANDOM_ARM_THINGY_CAN_ADDR = 7;
 
 	
 	// DIO Ports
-	public static final int CARRIAGE_LIMIT_SWITCH_DIO_PORT = 0;
+	public static final int ELEVATOR_ON_GROUND_LIMIT_SWITCH_DIO_PORT = 0;
 	
 	// Analog Ports
 	public static final int STORED_PRESSURE_SENSOR_AIO_PORT = 0;	
