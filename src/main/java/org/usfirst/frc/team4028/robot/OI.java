@@ -1,5 +1,7 @@
 package org.usfirst.frc.team4028.robot;
 
+import org.usfirst.frc.team4028.robot.commands.Chassis_ArcadeDriveAction;
+
 //#region Define Imports
 
 import org.usfirst.frc.team4028.robot.util.BeakXboxController;
@@ -61,6 +63,12 @@ public class OI {
 		//==========================================================
 		
 		// Driver Controller -> Command Mapping
+			DriverController.leftStick.whileActive(new Chassis_ArcadeDriveAction(DriverController.leftStick, DriverController.rightStick));
+			DriverController.rightStick.whileActive(new Chassis_ArcadeDriveAction(DriverController.leftStick, DriverController.rightStick));
+
+ 
+			DriverController.leftStick.whenReleased(new Chassis_ArcadeDriveAction(DriverController.leftStick, DriverController.rightStick));
+			DriverController.rightStick.whenReleased(new Chassis_ArcadeDriveAction(DriverController.leftStick, DriverController.rightStick));
 
 		// =========== Operator ======================================
 		OperatorController = new BeakXboxController(RobotMap.OPERATOR_GAMEPAD_USB_PORT);

@@ -27,9 +27,13 @@ public class RobotMap
 	// PCM Can Bus Address
 	public static final int PCM_CAN_ADDR = 0;	
 	
-	// Talons Can Bus Address
-	public static final int ELEVATOR_MOTOR_CAN_ADDR = 1;
-	public static final int CLIMB_DRIVE_MOTOR_CAN_ADDR = 2;
+	// Talons Can Bus Address\
+	public static final int LEFT_DRIVE_MASTER_CAN_ADDR = 1;
+	public static final int LEFT_DRIVE_SLAVE_CAN_ADDR = 2;
+	public static final int RIGHT_DRIVE_MASTER_CAN_ADDR = 3;
+	public static final int RIGHT_DRIVE_SLAVE_CAN_ADDR = 4;
+	public static final int ELEVATOR_MOTOR_CAN_ADDR = 5;
+	public static final int CLIMB_DRIVE_MOTOR_CAN_ADDR = 6;
 
 	
 	// DIO Ports
