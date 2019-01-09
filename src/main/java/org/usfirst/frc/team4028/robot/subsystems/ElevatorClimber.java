@@ -7,6 +7,8 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import org.usfirst.frc.team4028.robot.RobotMap;
+import org.usfirst.frc.team4028.robot.subsystems.Chassis.ChassisState;
+
 import java.awt.datatransfer.FlavorMap;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -15,8 +17,14 @@ public class ElevatorClimber
     private TalonSRX _elevatorMtr,_climbDriveMtr, _armMtr;
     private boolean _hasElevatorBeenZeroed, _isRobotElevated,_readyToElevate =false;
     private DigitalInput _isElevatorOnGround;
+    public enum Climber_State
+    {
+        MOVING,
+        HOLD,
+        DEFAULT
+    }
     
-    
+    Climber_State _climberState = Climber_State.DEFAULT;
     private static ElevatorClimber _instance = new ElevatorClimber();
     public static ElevatorClimber getInstance()
     {
@@ -45,6 +53,19 @@ public class ElevatorClimber
         _elevatorMtr.config_kF(0, 0, 10);
     }
 
+    public void updateCLimber()
+    {
+        switch(_climberState)
+        {
+            case MOVING:
+                return;
+            case HOLD:
+                keepElevatorAtCurrentHeight();
+                return;
+            case DEFAULT:
+            return;
+        }
+    }
     public void zeroElevator()
     {
         if(_elevatorMtr.getSensorCollection().isRevLimitSwitchClosed())
@@ -60,28 +81,14 @@ public class ElevatorClimber
         }
     }
 
-    public void elevate()
+    public void moveElevator(double throttleCmd)
     {
-        if(_readyToElevate)
-        {
-            if(_elevatorMtr.getSensorCollection().isFwdLimitSwitchClosed())
-            {
-                _elevatorMtr.set(ControlMode.PercentOutput, 0.1);
-                _isRobotElevated = false;
-            }
-            else
-            {
-                _elevatorMtr.set(ControlMode.PercentOutput, 0);
-                _isRobotElevated=true;    
-            } 
-        }
-        else
-        {
-            yeetTheArm();
-        }
+    
+        _elevatorMtr.set(ControlMode.PercentOutput, throttleCmd*0.1);
+        
     }
 
-    public void yeetTheArm()
+    public void moveArmtoStabilizingPos()
     {
         if(_armMtr.getSensorCollection().isFwdLimitSwitchClosed())
         {
@@ -95,7 +102,7 @@ public class ElevatorClimber
         } 
     }
 
-    public void keepElevatorAtMaxHeight()
+    public void keepElevatorAtCurrentHeight()
     {
         _elevatorMtr.set(ControlMode.MotionMagic, _elevatorMtr.getSelectedSensorPosition(0));
     }
@@ -105,16 +112,23 @@ public class ElevatorClimber
         return _hasElevatorBeenZeroed;
     }
 
-    public boolean isRobotElevated()
+
+
+    public boolean isRobotonFloor()
+    {
+        return !_elevatorMtr.getSensorCollection().isRevLimitSwitchClosed();
+    }
+
+    public boolean isChassisAtMaxHeight()
     {
         return _isRobotElevated;
     }
 
-    public void postElevateDrive()
+    public void postElevateDrive(double throttleCmd)
     {
         if(_isRobotElevated)
         {
-            _climbDriveMtr.set(ControlMode.PercentOutput, 0.1);
+            _climbDriveMtr.set(ControlMode.PercentOutput, 0.1*throttleCmd);
         }
         else
         {

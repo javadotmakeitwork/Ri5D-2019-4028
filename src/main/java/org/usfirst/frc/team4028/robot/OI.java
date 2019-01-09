@@ -66,9 +66,7 @@ public class OI {
 		// Driver Controller -> Command Mapping
 			DriverController.leftStick.whileActive(new Chassis_ArcadeDriveAction(DriverController.leftStick, DriverController.rightStick));
 			DriverController.rightStick.whileActive(new Chassis_ArcadeDriveAction(DriverController.leftStick, DriverController.rightStick));
-			DriverController.a.whenPressed(new Climber_RaiseChassis());
-			DriverController.b.whenPressed(new Climber_MoveForward(DriverController.b));
-			DriverController.x.whenPressed(new Climber_RestoreElevator());
+
 			DriverController.y.whenPressed(new Climber_GetDownFromLvl2());
 
 		// =========== Operator ======================================
@@ -76,7 +74,10 @@ public class OI {
 		//==========================================================
 		System.out.println("Creating Gamepad");
 		// Operator Controller -> Command Mapping
+		OperatorController.leftStick.whileActive(new Climber_MoveForward(OperatorController.leftStick));
+		OperatorController.rightStick.whileActive(new Climber_MoveElevator(OperatorController.rightStick));
 	}
+
 		
 	public double getOperator_Climber_JoystickCmd() {
 		if(Math.abs(OperatorController.getY(Hand.kRight)) >= 0.5){
