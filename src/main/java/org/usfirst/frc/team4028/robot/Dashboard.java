@@ -5,8 +5,6 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
 
-import org.usfirst.frc.team4028.robot.commands.auton.Auton_CG_ChassisTune;
-import org.usfirst.frc.team4028.robot.commands.auton.Auton_DoNothing;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -102,16 +100,8 @@ public class Dashboard {
 	public CommandGroup getSelectedAuton() {
 		//return new Auton_CG_BaseLine();
 		_isStartingLeft = (_autonStartingSideChooser.getSelected() == STARTING_SIDE.LEFT);
-		
-		switch(_autonModeChooser.getSelected()) {
-			case DO_NOTHING:
-				return new Auton_DoNothing();
-			case AUTO_TUNE:
-				return new Auton_CG_ChassisTune();
-			default:
-				return new Auton_DoNothing(); 
-		}
-		//return null;
+	
+		return null;
 	}
 	
 	public void outputToDashboard() {

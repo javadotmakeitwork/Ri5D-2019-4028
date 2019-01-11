@@ -9,12 +9,8 @@ package org.usfirst.frc.team4028.robot;
 
 // #region Import Statements
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Scheduler;
 
-import java.util.Date;
-
-import org.usfirst.frc.team4028.robot.auton.Paths;
 import org.usfirst.frc.team4028.robot.subsystems.Chassis;
 
 
@@ -25,16 +21,9 @@ public class Robot extends TimedRobot
 {
 	
 	// create instance of singelton Subsystems
-	private Dashboard _dashboard = Dashboard.getInstance();
-	
+		
 	private Chassis _chassis = Chassis.getInstance();
 	private OI _oi = OI.getInstance();
-
-
-
-	// class level working variables
- 	long _lastDashboardWriteTimeMSec;
-
  	
 	/**
 	 * This function is run when the robot is first started up and should be used for any initialization code.
@@ -43,10 +32,8 @@ public class Robot extends TimedRobot
 	public void robotInit() 
 	{
 		_chassis.stop();
-		Paths.buildPaths();
 
 		
-		outputAllToDashboard();
 	}
 
 	/**
@@ -55,12 +42,11 @@ public class Robot extends TimedRobot
 	 * the robot is disabled.
 	 */
 	@Override
-	public void disabledInit() {
-
-	}
+	public void disabledInit() {}
 
 	@Override
-	public void disabledPeriodic() {
+	public void disabledPeriodic() 
+	{
 		Scheduler.getInstance().run();
 
 	}
@@ -69,16 +55,10 @@ public class Robot extends TimedRobot
 	 * This method runs 1x when the robot enters auton mode
 	 */
 	@Override
-	public void autonomousInit() {
+	public void autonomousInit() 
+	{
 		_chassis.stop();
-		_dashboard.getSelectedAuton().start();
 		Scheduler.getInstance().run();
-
-
-		_chassis.setHighGear(true);
-
-		_lastDashboardWriteTimeMSec = new Date().getTime(); // snapshot time to control spamming
-		_dashboard.outputToDashboard();
 	}
 
 	/**
@@ -87,44 +67,29 @@ public class Robot extends TimedRobot
 	@Override
 	public void autonomousPeriodic() 
 	{
-
-		Scheduler.getInstance().run();
-		_chassis.updateChassis(Timer.getFPGATimestamp());
-		// System.out.println(_chassis.isDoneWithPath());
-		
-		// ============= Refresh Dashboard =============
-		_dashboard.outputToDashboard();
-		outputAllToDashboard();
-		
-		// ============= Optionally Log Data =============
-		
+		Scheduler.getInstance().run();		
 	}
 
 	/**
 	 * This method runs 1x when the robot enters telop mode
 	 */
 	@Override
-	public void teleopInit() {
+	public void teleopInit() 
+	{
 		// This makes sure that the autonomous stops running when
 		// teleop starts running. If you want the autonomous to
 		// continue until interrupted by another command, remove
 		// this line or comment it out.
 		_chassis.stop();
-		_lastDashboardWriteTimeMSec = new Date().getTime(); // snapshot time to control spamming
-		_lastDashboardWriteTimeMSec = new Date().getTime(); // snapshot time to control spamming
 	}
 
 	/**
 	 * This function is called periodically during operator control.
 	 */
 	@Override
-	public void teleopPeriodic() {
+	public void teleopPeriodic() 
+	{
 		Scheduler.getInstance().run();
-		// ============= Refresh Dashboard =============
-		outputAllToDashboard();
-		_dashboard.outputToDashboard();
-		
-		// ============= Optionally Log Data =============
 
 	}
 
@@ -133,31 +98,5 @@ public class Robot extends TimedRobot
 	 */
 	@Override
 	public void testPeriodic() {}
-	
-	/** Method to Push Data to ShuffleBoard */
-	private void outputAllToDashboard() {
-		// limit spamming
-    	// add scan time sample to calc scan time rolling average
-    	//_scanTimeSamples.add(new BigDecimal(scanCycleDeltaInMSecs));
-    	
-    	if((new Date().getTime() - _lastDashboardWriteTimeMSec) > 100) {
-    		// each subsystem should add a call to a outputToSmartDashboard method
-    		// to push its data out to the dashboard
-
-    		_chassis.updateDashboard(); 
-
-	    	
-    		// write the overall robot dashboard info
-	    	
-	    	//BigDecimal movingAvg = _scanTimeSamples.getAverage();
-	    	//DecimalFormat df = new DecimalFormat("####");
-	    	//SmartDashboard.putString("Scan Time (2 sec roll avg)", df.format(movingAvg) + " mSec");
-    		// snapshot last time
-    		_lastDashboardWriteTimeMSec = new Date().getTime();
-    	}
-    	
-    	// snapshot when this scan ended
-	}
-	
 
 }

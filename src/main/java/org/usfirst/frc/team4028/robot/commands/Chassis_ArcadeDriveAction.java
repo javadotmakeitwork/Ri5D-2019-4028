@@ -46,7 +46,7 @@ public class Chassis_ArcadeDriveAction extends Command
     protected void initialize() 
     {    	
         _startTime = Timer.getFPGATimestamp();
-		_chassis.setHighGear(false);
+		
     }
 
     
@@ -65,7 +65,7 @@ public class Chassis_ArcadeDriveAction extends Command
         }
         else
         {
-            _chassis.arcadeDrive(-_throttle, _turn);
+            _chassis.arcadeDrive(-_leftThumbstick.getY(), _rightThumbstick.getX());
         }
     }
 
