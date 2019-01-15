@@ -28,7 +28,6 @@ public class ElevatorClimber
         _elevatorMtr=new TalonSRX(RobotMap.ELEVATOR_MOTOR_CAN_ADDR);
         _climbDriveMtr=new TalonSRX(RobotMap.CLIMB_DRIVE_MOTOR_CAN_ADDR);
         _armMtr = new TalonSRX(RobotMap.RANDOM_ARM_THINGY_CAN_ADDR);
-        _isElevatorOnGround = new DigitalInput(RobotMap.ELEVATOR_ON_GROUND_LIMIT_SWITCH_DIO_PORT);
         configMtrs();
 
     }
@@ -42,8 +41,8 @@ public class ElevatorClimber
         _elevatorMtr.setSensorPhase(true);
         _armMtr.configForwardLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.Disabled, 10);
         _armMtr.configReverseLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.Disabled, 10);
-        _armMtr.configContinuousCurrentLimit(20, 10);
-        _armMtr.configPeakCurrentDuration(20, 10);
+        //_armMtr.configContinuousCurrentLimit(20, 10);
+        //_armMtr.configPeakCurrentDuration(20, 10);
         _elevatorMtr.config_kP(0, 1.6, 10);
         _elevatorMtr.config_kI(0, 0, 10);
         _elevatorMtr.config_kD(0, 16, 10);
@@ -55,20 +54,31 @@ public class ElevatorClimber
 
     public void moveElevator(double throttleCmd)//Control Elevator with a Throttle Command from the Joystick
     {
-    
-        _elevatorMtr.set(ControlMode.PercentOutput, throttleCmd*0.3);
+        if(throttleCmd<0)
+        {
+            _elevatorMtr.set(ControlMode.PercentOutput, throttleCmd*0.8);
+        }
+        else
+        {
+            _elevatorMtr.set(ControlMode.PercentOutput, throttleCmd*0.5);
+        }
         _currentPosition=_elevatorMtr.getSelectedSensorPosition(0);
         
     }
 
-    public void moveArmtoStabilizingPos()//Moves the Stabilizing Arm into Position to Climb
+    public void moveArmtoStabilizingPos(double throttle)//Moves the Stabilizing Arm into Position to Climb
     {
-        _armMtr.set(ControlMode.PercentOutput, -1.0);
+        _armMtr.set(ControlMode.PercentOutput, 0.4*throttle);
     }
 
     public void stopArms()
     {
         _armMtr.set(ControlMode.PercentOutput, 0);
+    }
+
+    public void setElevatorPos(int pos)
+    {
+        _elevatorMtr.setSelectedSensorPosition(pos, 0, 10);
     }
 
     public void keepElevatorAtCurrentHeight()//Utilize Motion Magic to Prevent the Elevator From Backdriving

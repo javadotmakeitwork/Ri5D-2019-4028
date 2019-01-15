@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Scheduler;
 
 import org.usfirst.frc.team4028.robot.subsystems.Chassis;
+import org.usfirst.frc.team4028.robot.subsystems.ElevatorClimber;
 
 
 /**
@@ -23,6 +24,7 @@ public class Robot extends TimedRobot
 	// create instance of singelton Subsystems
 		
 	private Chassis _chassis = Chassis.getInstance();
+	private ElevatorClimber _climber = ElevatorClimber.getInstance();
 	private OI _oi = OI.getInstance();
  	
 	/**
@@ -81,6 +83,9 @@ public class Robot extends TimedRobot
 		// continue until interrupted by another command, remove
 		// this line or comment it out.
 		_chassis.stop();
+		_climber.moveElevator(0);
+		_climber.setElevatorPos(0);
+		
 	}
 
 	/**

@@ -73,8 +73,8 @@ public class OI {
 		//==========================================================
 		System.out.println("Creating Gamepad");
 		// Operator Controller -> Command Mapping
-		//OperatorController.a.whileHeld(new Climber_PlaceArms());
-		//OperatorController.a.whenReleased(new Climber_StopArms());
+		OperatorController.rt.whileActive(new Climber_PlaceArms(OperatorController.rt));
+		OperatorController.rt.whenInactive(new Climber_StopArms());
 		OperatorController.leftStick.whileHeld(new Climber_MoveForward(OperatorController.leftStick));
 		OperatorController.rightStick.whileActive(new Climber_MoveElevator(OperatorController.rightStick));
 		OperatorController.leftStick.whenReleased(new Climber_MoveForward(OperatorController.leftStick));
