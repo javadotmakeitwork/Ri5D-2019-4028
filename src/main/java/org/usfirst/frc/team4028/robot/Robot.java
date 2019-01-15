@@ -83,8 +83,7 @@ public class Robot extends TimedRobot
 		// continue until interrupted by another command, remove
 		// this line or comment it out.
 		_chassis.stop();
-		_climber.moveElevator(0);
-		_climber.setElevatorPos(0);
+		_climber.moveElevator(0);//tell elevator to stop at the begining of teleop to prevent it from trying to reach its previous position on enable
 		
 	}
 

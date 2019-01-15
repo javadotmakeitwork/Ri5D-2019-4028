@@ -1,19 +1,18 @@
 package org.usfirst.frc.team4028.robot.commands;
 
 import org.usfirst.frc.team4028.robot.subsystems.ElevatorClimber;
+import org.usfirst.frc.team4028.robot.util.BeakXboxController.Trigger;
 
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.buttons.Trigger;
 import edu.wpi.first.wpilibj.command.Command;
 
 public class Climber_PlaceArms extends Command
 {
-    org.usfirst.frc.team4028.robot.util.BeakXboxController.Trigger _rightTrigger;
+    Trigger _rightTrigger;
     ElevatorClimber _climber = ElevatorClimber.getInstance();
-    public Climber_PlaceArms(org.usfirst.frc.team4028.robot.util.BeakXboxController.Trigger righTrigger)
+    public Climber_PlaceArms(Trigger rightTrigger)//places arms on the front of the robot in order to stabilize the robot while climbing
     {
         setInterruptible(true);
-        _rightTrigger = righTrigger;
+        _rightTrigger = rightTrigger;
     }
     @Override
     protected void initialize() 
@@ -24,7 +23,7 @@ public class Climber_PlaceArms extends Command
     @Override
     protected void execute() 
     {
-        _climber.moveArmtoStabilizingPos(_rightTrigger.getX());
+        _climber.moveArmtoStabilizingPos(_rightTrigger.getX());//send the arms out on the command of a trigger
     }
 
     protected boolean isFinished() 

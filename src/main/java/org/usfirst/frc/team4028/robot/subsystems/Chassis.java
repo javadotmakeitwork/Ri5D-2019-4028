@@ -15,17 +15,11 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 /**
  * This class defines the Chassis Subsystem, it is responsible for:
  * 	- Left & Right drive Motors
- *  - Solenoid that controls the shifting
  */
-public class Chassis extends Subsystem //Define Talons and Drive distance
+public class Chassis extends Subsystem 
 {
 
 	private TalonSRX _leftMaster, _leftSlave, _rightMaster, _rightSlave;
-
-
-	public double _leftMtrDriveSetDistanceCmd;
-	public double _rightMtrDriveSetDistanceCmd;
-	
 	//=====================================================================================
 	// Define Singleton Pattern
 	//=====================================================================================
@@ -44,7 +38,7 @@ public class Chassis extends Subsystem //Define Talons and Drive distance
 		_rightMaster = new TalonSRX(RobotMap.RIGHT_DRIVE_MASTER_CAN_ADDR);
 		_rightSlave = new TalonSRX(RobotMap.RIGHT_DRIVE_SLAVE_CAN_ADDR);
 		
-		_leftSlave.follow(_leftMaster);
+		_leftSlave.follow(_leftMaster);//set slave motors to follow master motors
 		_rightSlave.follow(_rightMaster);
 		
 		_leftMaster.setInverted(true);
@@ -59,31 +53,21 @@ public class Chassis extends Subsystem //Define Talons and Drive distance
 	
 	}
 
-
-
-
-
-
-	
-	/* ===== Chassis State: PERCENT VBUS ===== */
-	/** Arcade drive with throttle and turn inputs. Includes anti-tipping. */
+	/** Arcade drive with throttle and turn inputs.*/
 		
-		public void arcadeDrive(double throttleCmdRaw, double turnCmdRaw)
-  		{
-    		_leftMaster.set(ControlMode.PercentOutput, throttleCmdRaw + (0.7 * turnCmdRaw));
-    		_rightMaster.set(ControlMode.PercentOutput, throttleCmdRaw + (0.7 * -1.0 * turnCmdRaw));
-  		}
+	public void arcadeDrive(double throttleCmdRaw, double turnCmdRaw)
+	{
+		_leftMaster.set(ControlMode.PercentOutput, throttleCmdRaw + (0.7 * turnCmdRaw));
+		_rightMaster.set(ControlMode.PercentOutput, throttleCmdRaw + (0.7 * -1.0 * turnCmdRaw));
+	}
 	
-	private void configDriveMotors(TalonSRX talon) 
+	private void configDriveMotors(TalonSRX talon) //sets up motors without limit switches and in brake mode
 	{
 		talon.configForwardLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.Disabled, 0);
 		talon.configReverseLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.Disabled, 0);
 		talon.setNeutralMode(NeutralMode.Brake);
         
 	}
-	
-    // Put methods for controlling this subsystem
-    // here. Call these from Commands.
 
 	
 	public void stop()//Set Motor output to zero

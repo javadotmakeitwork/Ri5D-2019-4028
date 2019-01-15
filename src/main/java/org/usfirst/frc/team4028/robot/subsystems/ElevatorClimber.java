@@ -14,8 +14,6 @@ import edu.wpi.first.wpilibj.DigitalInput;
 public class ElevatorClimber
 {
     private TalonSRX _elevatorMtr,_climbDriveMtr, _armMtr;
-    private boolean _hasElevatorBeenZeroed, _isRobotElevated =false;
-    private DigitalInput _isElevatorOnGround;
     public double _currentPosition=0;
     
     private static ElevatorClimber _instance = new ElevatorClimber();
@@ -27,28 +25,26 @@ public class ElevatorClimber
     {
         _elevatorMtr=new TalonSRX(RobotMap.ELEVATOR_MOTOR_CAN_ADDR);
         _climbDriveMtr=new TalonSRX(RobotMap.CLIMB_DRIVE_MOTOR_CAN_ADDR);
-        _armMtr = new TalonSRX(RobotMap.RANDOM_ARM_THINGY_CAN_ADDR);
+        _armMtr = new TalonSRX(RobotMap.STABILIZING_ARM_CAN_ADDR);
         configMtrs();
 
     }
 
-    public void configMtrs()//Set Up All Encoders, Limit Switches, and PID Constants for the Motors
+    public void configMtrs()//Set Up All Encoders, Limit Switches, Sensor Phases, and PID Constants for the Motors
     {
         _elevatorMtr.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyClosed, 10);
         _elevatorMtr.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyClosed, 10);
         _elevatorMtr.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
         _elevatorMtr.setNeutralMode(NeutralMode.Brake);
         _elevatorMtr.setSensorPhase(true);
-        _armMtr.configForwardLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.Disabled, 10);
-        _armMtr.configReverseLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.Disabled, 10);
-        //_armMtr.configContinuousCurrentLimit(20, 10);
-        //_armMtr.configPeakCurrentDuration(20, 10);
         _elevatorMtr.config_kP(0, 1.6, 10);
         _elevatorMtr.config_kI(0, 0, 10);
         _elevatorMtr.config_kD(0, 16, 10);
         _elevatorMtr.config_kF(0, 1.0, 10);
         _climbDriveMtr.configForwardLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.Disabled, 10);
         _climbDriveMtr.configReverseLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.Disabled, 10);
+        _armMtr.configForwardLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.Disabled, 10);
+        _armMtr.configReverseLimitSwitchSource(LimitSwitchSource.Deactivated, LimitSwitchNormal.Disabled, 10);
     }
 
 
@@ -99,34 +95,4 @@ public class ElevatorClimber
     {
         _climbDriveMtr.set(ControlMode.PercentOutput, 0);
     }
-
-    public void driveDown()//Attempt to Get Down From HAB Level 2 in the Sandstorm Period
-    {
-        if(_isElevatorOnGround.get())
-        {
-            _climbDriveMtr.set(ControlMode.PercentOutput, 0.1);
-            _elevatorMtr.set(ControlMode.PercentOutput, -0.1);
-        }
-        else
-        {
-            _elevatorMtr.set(ControlMode.PercentOutput, 0.1);
-        }
-    }
-    //================================================================================
-    //Property Accessors
-    //=================================================================================
-    public boolean hasElevatorBeenZeroed()
-    {
-        return _hasElevatorBeenZeroed;
-    }
-    public boolean isRobotonFloor()
-    {
-        return !_elevatorMtr.getSensorCollection().isRevLimitSwitchClosed();
-    }
-
-    public boolean isChassisAtMaxHeight()
-    {
-        return _isRobotElevated;
-    }
-
 }
