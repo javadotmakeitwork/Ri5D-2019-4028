@@ -6,9 +6,7 @@ import org.usfirst.frc.team4028.robot.commands.*;
 
 import org.usfirst.frc.team4028.robot.util.BeakXboxController;
 
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 //#endregion
-import edu.wpi.first.wpilibj.command.Command;
 
 /**
  * This class is the glue that binds the controls on the physical operator
@@ -64,11 +62,10 @@ public class OI {
 		//==========================================================
 		
 		// Driver Controller -> Command Mapping
-			DriverController.leftStick.whileActive(new Chassis_ArcadeDriveAction(DriverController.leftStick, DriverController.rightStick));
-			DriverController.rightStick.whileActive(new Chassis_ArcadeDriveAction(DriverController.leftStick, DriverController.rightStick));
-			DriverController.a.whenPressed(new Climber_RaiseChassis());
-			DriverController.b.whenPressed(new Climber_MoveForward(DriverController.b));
-			DriverController.x.whenPressed(new Climber_RestoreElevator());
+			DriverController.leftStick.whileHeld(new Chassis_ArcadeDriveAction(DriverController.leftStick, DriverController.rightStick));
+			DriverController.rightStick.whileHeld(new Chassis_ArcadeDriveAction(DriverController.leftStick, DriverController.rightStick));
+			DriverController.leftStick.whenReleased(new Chassis_ArcadeDriveAction(DriverController.leftStick, DriverController.rightStick));
+			DriverController.rightStick.whenReleased(new Chassis_ArcadeDriveAction(DriverController.leftStick, DriverController.rightStick));
 			DriverController.y.whenPressed(new Climber_GetDownFromLvl2());
 
 		// =========== Operator ======================================
@@ -76,15 +73,11 @@ public class OI {
 		//==========================================================
 		System.out.println("Creating Gamepad");
 		// Operator Controller -> Command Mapping
-	}
-		
-	public double getOperator_Climber_JoystickCmd() {
-		if(Math.abs(OperatorController.getY(Hand.kRight)) >= 0.5){
-			// flip the sign, pushing the joystick up is a # < 0
-			return OperatorController.getY(Hand.kRight) * -1.0;
-		} 
-		else {
-			return 0.0;
-		}
+		OperatorController.rt.whileActive(new Climber_PlaceArms(OperatorController.rt));
+		OperatorController.rt.whenInactive(new Climber_StopArms());
+		OperatorController.leftStick.whileHeld(new Climber_MoveForward(OperatorController.leftStick));
+		OperatorController.rightStick.whileActive(new Climber_MoveElevator(OperatorController.rightStick));
+		OperatorController.leftStick.whenReleased(new Climber_MoveForward(OperatorController.leftStick));
+		OperatorController.rightStick.whenInactive(new Climber_HoldPosition());
 	}
 }

@@ -1,19 +1,16 @@
 package org.usfirst.frc.team4028.robot.commands;
 
 import org.usfirst.frc.team4028.robot.subsystems.ElevatorClimber;
-import org.usfirst.frc.team4028.robot.util.BeakXboxController;
-
-import edu.wpi.first.wpilibj.buttons.Button;
-import edu.wpi.first.wpilibj.buttons.JoystickButton;
+import org.usfirst.frc.team4028.robot.util.BeakXboxController.Thumbstick;
 import edu.wpi.first.wpilibj.command.Command;
 
-public class Climber_MoveForward extends Command
+public class Climber_MoveForward extends Command //Set Elevator to respond to Joystick control via command
 {
     ElevatorClimber _climber = ElevatorClimber.getInstance();
-    Button _button;
-    public Climber_MoveForward(Button button)
+    Thumbstick _leftThumbstick;
+    public Climber_MoveForward(Thumbstick leftThumbstick)
     {
-        _button=button;
+        _leftThumbstick=leftThumbstick;
         setInterruptible(true);
     }
     @Override
@@ -22,16 +19,9 @@ public class Climber_MoveForward extends Command
         
     }
     @Override
-    protected void execute() 
+    protected void execute() //Set Elevator Motor wheels to drive after Elevator is extended
     {
-        if(_button.get())
-        {
-            _climber.postElevateDrive();
-        }
-        else
-        {
-            _climber.stopElevatorDrive();
-        }
+        _climber.postElevateDrive(_leftThumbstick.getY());
     }
     
     protected boolean isFinished() 

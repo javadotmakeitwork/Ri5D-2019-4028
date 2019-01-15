@@ -4,27 +4,21 @@ import org.usfirst.frc.team4028.robot.subsystems.ElevatorClimber;
 
 import edu.wpi.first.wpilibj.command.Command;
 
-public class Climber_RestoreElevator extends Command
+public class Climber_HoldPosition extends Command
 {
     ElevatorClimber _climber = ElevatorClimber.getInstance();
-    public Climber_RestoreElevator()
+    public Climber_HoldPosition()
     {
         setInterruptible(false);
     }
     @Override
     protected void initialize() 
     {
-        
-    }
-    @Override
-    protected void execute() 
-    {
-        _climber.zeroElevator();
+        _climber.keepElevatorAtCurrentHeight();
     }
     @Override
     protected boolean isFinished() 
     {
-        return _climber.hasElevatorBeenZeroed();
+        return true;
     }
-
 }
