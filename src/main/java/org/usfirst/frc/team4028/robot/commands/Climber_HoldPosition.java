@@ -14,11 +14,12 @@ public class Climber_HoldPosition extends Command
     @Override
     protected void initialize() 
     {
-        _climber.keepElevatorAtCurrentHeight();
+        _climber.keepElevatorAtCurrentHeight();//the elevator needs to be told to stay at the target position only once as the 
+                                                //command will not change until a new one is given
     }
     @Override
     protected boolean isFinished() 
     {
-        return true;
+        return true;//only needs to run once
     }
 }

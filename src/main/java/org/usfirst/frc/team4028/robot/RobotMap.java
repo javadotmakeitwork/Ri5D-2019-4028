@@ -7,8 +7,6 @@
 
 package org.usfirst.frc.team4028.robot;
 
-import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.SPI.Port;
 
 /**
  * The RobotMap is a mapping from the ports sensors and actuators are wired into
@@ -21,11 +19,6 @@ public class RobotMap
 	// Drivers Station Gamepad USB Ports
 	public static final int DRIVER_GAMEPAD_USB_PORT = 0;
 	public static final int OPERATOR_GAMEPAD_USB_PORT = 1;
-	public static final int ENGINEERING_GAMEPAD_USB_PORT = 2;
-	public static final int ENGINEERING_GAMEPAD_B_USB_PORT = 3;
-	
-	// PCM Can Bus Address
-	public static final int PCM_CAN_ADDR = 0;	
 	
 	// Talons Can Bus Address\
 	public static final int LEFT_DRIVE_MASTER_CAN_ADDR = 1;
@@ -34,26 +27,5 @@ public class RobotMap
 	public static final int RIGHT_DRIVE_SLAVE_CAN_ADDR = 4;
 	public static final int ELEVATOR_MOTOR_CAN_ADDR = 5;
 	public static final int CLIMB_DRIVE_MOTOR_CAN_ADDR = 6;
-	public static final int RANDOM_ARM_THINGY_CAN_ADDR = 7;
-
-	
-	// DIO Ports
-	public static final int ELEVATOR_ON_GROUND_LIMIT_SWITCH_DIO_PORT = 0;
-	
-	// Analog Ports
-	public static final int STORED_PRESSURE_SENSOR_AIO_PORT = 0;	
-	
-	// NavX (on Roborio)
-	public static final SPI.Port NAVX_PORT = Port.kMXP;
-	
-	// PWM Ports on RoboRIO
-	public static final int CLIMBER_SERVO_PWM_ADDRESS = 0;
-	
-	// PCM Ports
-	public static final int CARRIAGE_SQUEEZE_PCM_PORT = 0;
-	public static final int CARRIAGE_WIDE_PCM_PORT = 1;
-	public static final int SHIFTER_EXTEND_PCM_PORT = 3;
-	public static final int SHIFTER_RETRACT_PCM_PORT = 7;
-	public static final int CARRIAGE_FLAP_UP_PCM_PORT = 4;
-	public static final int CARRIAGE_FLAP_DOWN_PCM_PORT = 5;
+	public static final int STABILIZING_ARM_CAN_ADDR = 7;
 }

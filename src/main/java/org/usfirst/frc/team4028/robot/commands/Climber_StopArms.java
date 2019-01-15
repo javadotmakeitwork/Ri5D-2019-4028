@@ -14,7 +14,7 @@ public class Climber_StopArms extends Command
     @Override
     protected void initialize() 
     {
-        _climber.stopArms();
+        _climber.stopArms();//stops the arms once the trigger is released
     }
 
     @Override
